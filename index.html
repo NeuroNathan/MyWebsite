@@ -388,39 +388,3 @@
   </script>
 </body>
 </html>
-    // --- ADD ENTER + DOUBLE-CLICK HANDLING -------------------------------
-    function enableQuickSelect(){
-      document.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' && el('#screen-quiz').style.display !== 'none'){
-          const pack = PACKS[state.packIndex];
-          const chosen = state.answers[pack.id]?.[state.qIndex];
-          if(typeof chosen === 'number'){
-            el('#nextBtn').click();
-          }
-        }
-      });
-
-      // Add double-click to select choice and move next
-      els('.choice').forEach((div, idx)=>{
-        div.ondblclick = ()=>{
-          const pack = PACKS[state.packIndex];
-          (state.answers[pack.id] ||= []);
-          state.answers[pack.id][state.qIndex] = idx;
-          save();
-          div.style.borderColor='var(--accent)';
-          el('#nextBtn').click();
-        };
-      });
-    }
-
-    // Re-run after quiz render to bind double-clicks
-    const originalRenderQuiz = renderQuiz;
-    renderQuiz = ()=>{
-      originalRenderQuiz();
-      enableQuickSelect();
-    };
-
-    // Highlight selection stays handled in renderQuiz()
-  </script>
-</body>
-</html>
