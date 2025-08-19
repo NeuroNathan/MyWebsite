@@ -1,390 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Belief Quiz — MVP</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belief Quiz</title>
   <style>
-    :root{
-      --bg:#0b0e14; --card:#121826; --ink:#e6edf3; --muted:#9fb0c0; --brand:#6ee7ff; --brand-2:#a78bfa; --accent:#22d3ee; --ok:#34d399; --warn:#f59e0b;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f9f9f9;
+      text-align: center;
     }
-    html,body{height:100%;}
-    body{margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:radial-gradient(1200px 600px at 20% -10%, rgba(34,211,238,.15), transparent), radial-gradient(800px 400px at 120% 10%, rgba(167,139,250,.12), transparent), var(--bg); color:var(--ink);}    
-    .container{max-width:1000px;margin:0 auto;padding:24px;}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.35);}
-    .pad{padding:24px;}
-    .h1{font-size:28px;font-weight:800;letter-spacing:-0.02em;}
-    .h2{font-size:18px;font-weight:700;margin:0 0 8px 0}
-    .muted{color:var(--muted)}
-    .btn{appearance:none;border:0; padding:12px 16px; border-radius:12px; font-weight:700; cursor:pointer; color:#00111a; background:linear-gradient(135deg,var(--brand),var(--brand-2));}
-    .btn.secondary{background:#1f2a44;color:var(--ink);border:1px solid rgba(255,255,255,.12)}
-    .btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.15)}
-    .row{display:flex; gap:16px; align-items:center; flex-wrap:wrap}
-    .choices{display:grid; gap:12px}
-    .choice{padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); cursor:pointer}
-    .choice:hover{border-color:rgba(255,255,255,.25)}
-    .progress{height:10px; background:#172036; border-radius:99px; overflow:hidden; border:1px solid rgba(255,255,255,.06)}
-    .progress>div{height:100%; background:linear-gradient(90deg,var(--accent),var(--brand-2)); width:0%}
-    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; background:#172036; border:1px solid rgba(255,255,255,.1); color:var(--muted); border-radius:999px; font-size:12px}
-    .pill .dot{width:8px;height:8px;border-radius:50%}
-    .grid{display:grid; gap:16px}
-    @media(min-width:860px){.grid.two{grid-template-columns:1.1fr .9fr}}
-    .share-card{position:relative; background:linear-gradient(180deg,#0d1220,#0b1020); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:20px;}
-    .watermark{position:absolute; inset:auto 12px 12px auto; font-size:12px; color:#7aa7be}
-    .switch{display:inline-flex; align-items:center; gap:8px; cursor:pointer}
-    .switch input{display:none}
-    .toggle{width:40px;height:24px; background:#1a2744; border-radius:999px; position:relative; border:1px solid rgba(255,255,255,.12)}
-    .toggle::after{content:""; position:absolute; width:18px;height:18px; background:white; border-radius:50%; top:2px; left:3px; transition:all .2s ease;}
-    .switch input:checked + .toggle{background:#0ea5e9}
-    .switch input:checked + .toggle::after{left:19px}
-    .small{font-size:12px}
-    .footer{opacity:.8; font-size:12px; text-align:center; margin-top:16px}
-    a{color:#7dd3fc}
+    #quiz-container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      opacity: 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .answer {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .answer:hover, .answer:focus {
+      background: #d0d0d0;
+      transform: scale(1.02);
+      outline: none;
+    }
+    .selected {
+      background: #90caf9;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
-  <!-- CDN libs: Chart.js for radar; html-to-image for PNG export -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header class="row" style="justify-content:space-between;margin-bottom:16px">
-      <div class="row">
-        <div class="pill"><span class="dot" style="background:var(--brand)"></span> Belief Quiz — MVP</div>
-      </div>
-      <div class="row">
-        <button id="resetBtn" class="btn ghost" title="Start over">Reset</button>
-        <button id="exportBtn" class="btn secondary" title="Export share card as PNG" disabled>Download Card</button>
-      </div>
-    </header>
-
-    <main class="card pad">
-      <div id="screen-intro">
-        <div class="h1">Map your vibes → then grow a real map</div>
-        <p class="muted">Start light like a Buzzfeed quiz. Get a clean, shareable card. As you answer more, your mini-map expands into a deeper worldview graph.</p>
-        <div class="row" style="margin:16px 0 8px">
-          <span class="pill"><strong>3</strong> packs • ~2 min</span>
-          <span class="pill">Private by default • You choose what to show</span>
-        </div>
-        <div style="margin-top:16px" class="row">
-          <button id="startBtn" class="btn">Start</button>
-          <button id="demoBtn" class="btn secondary">Skip to demo result</button>
-        </div>
-      </div>
-
-      <div id="screen-quiz" style="display:none">
-        <div class="row" style="justify-content:space-between; align-items:flex-end; margin-bottom:12px">
-          <div>
-            <div class="h2" id="packTitle">Pack</div>
-            <div class="muted small" id="qCounter">Question</div>
-          </div>
-          <div style="min-width:240px" title="Progress" class="progress"><div id="progressBar"></div></div>
-        </div>
-        <div id="questionBox" class="grid" style="gap:12px"></div>
-        <div class="row" style="justify-content:space-between;margin-top:12px">
-          <button id="backBtn" class="btn ghost">Back</button>
-          <button id="nextBtn" class="btn">Next</button>
-        </div>
-      </div>
-
-      <div id="screen-result" style="display:none">
-        <div class="grid two">
-          <div>
-            <div class="h1" style="margin-bottom:6px">Your shareable card</div>
-            <p class="muted" style="margin-top:0">Toggle what shows publicly. Download the card as an image. Your full data stays private on your device in this MVP.</p>
-            <div style="margin:10px 0 6px" class="small muted">Visible on card:</div>
-            <div class="row" id="visibilityToggles"></div>
-          </div>
-          <div>
-            <div class="share-card" id="shareCard">
-              <div class="watermark">beliefs.app/mvp</div>
-              <div class="row" style="justify-content:space-between;align-items:flex-start">
-                <div>
-                  <div class="pill" style="margin-bottom:8px">Quiz v0.1</div>
-                  <div style="font-weight:800; font-size:22px" id="archetypeTitle">Archetype</div>
-                  <div class="muted small" id="archetypeTag">Tagline</div>
-                </div>
-                <div style="text-align:right">
-                  <div class="small muted" id="timestamp"></div>
-                </div>
-              </div>
-              <div style="margin:14px 0" class="muted" id="summaryText">Summary</div>
-              <canvas id="radarChart" width="420" height="320" style="background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:8px"></canvas>
-            </div>
-            <div class="footer">Tip: paste this on your profile, or compare with friends.</div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <footer class="footer">MVP demo. No server. Data saved to <code>localStorage</code>. Replace packs/questions and styles as you like.</footer>
+  <div id="quiz-container">
+    <h2 id="question">Loading...</h2>
+    <div id="answers"></div>
   </div>
 
   <script>
-    // --- DATA MODEL --------------------------------------------------------
-    const PACKS = [
+    const quizData = [
       {
-        id: 'ethics',
-        name: 'Ethics Pack',
-        axis: 'Ethics',
-        weight: 1,
-        questions: [
-          { q: 'When dilemmas arise, which matters more?', axis: [['Care/Harm',1], ['Fairness/Cheating',1]], choices: [
-              { label:'Minimize harm, even if rules bend', score: { ethics_care: 2 } },
-              { label:'Follow rules impartially', score: { ethics_fair: 2 } },
-              { label:'Depends on context', score: { ethics_care: 1, ethics_fair: 1 } },
-          ]},
-          { q: 'Is tradition a reliable moral guide?', axis: [['Authority/Subversion',1], ['Loyalty/Betrayal',1]], choices: [
-              { label:'Often yes', score: { ethics_authority: 2, ethics_loyalty: 1 } },
-              { label:'Rarely', score: { ethics_authority: 0, ethics_loyalty: 0 } },
-              { label:'Sometimes', score: { ethics_authority: 1, ethics_loyalty: 1 } },
-          ]},
-        ]
+        question: "Do you believe in free will?",
+        answers: ["Yes", "No", "Not sure"]
       },
       {
-        id: 'epistemology',
-        name: 'Faith & Reason Pack',
-        axis: 'Epistemology',
-        weight: 1,
-        questions: [
-          { q: 'What convinces you most?', axis: [['Empiricism',1], ['Rationalism',1], ['Faith',1]], choices: [
-              { label:'Experiments & data', score: { epi_empiricism: 2 } },
-              { label:'Logical argument', score: { epi_rationalism: 2 } },
-              { label:'Spiritual testimony', score: { epi_faith: 2 } },
-          ]},
-          { q: 'If data conflicts with your priors…', axis: [['Open-mindedness',1]], choices: [
-              { label:'I update quickly', score: { epi_update: 2 } },
-              { label:'I look for more evidence', score: { epi_update: 1 } },
-              { label:'I stick with priors', score: { epi_update: 0 } },
-          ]},
-        ]
-      },
-      {
-        id: 'news',
-        name: 'News & Trust Pack',
-        axis: 'Media',
-        weight: 1,
-        questions: [
-          { q: 'Your default news diet is…', axis: [['Mainstream',1], ['Independent',1]], choices: [
-              { label:'Major outlets & AP-style wires', score: { media_mainstream: 2 } },
-              { label:'Niche/indie & expert newsletters', score: { media_indie: 2 } },
-              { label:'Mix of both', score: { media_mainstream: 1, media_indie: 1 } },
-          ]},
-          { q: 'Trust in institutional fact-checking?', axis: [['Institutional Trust',1]], choices: [
-              { label:'High', score: { media_trust: 2 } },
-              { label:'Moderate', score: { media_trust: 1 } },
-              { label:'Low', score: { media_trust: 0 } },
-          ]},
-        ]
+        question: "Is morality objective?",
+        answers: ["Yes", "No", "Depends"]
       }
     ];
 
-    // Map score keys to pretty labels + which dimension they belong to for the radar
-    const DIMENSIONS = {
-      ethics_care: { label: 'Care', group: 'Ethics' },
-      ethics_fair: { label: 'Fairness', group: 'Ethics' },
-      ethics_authority: { label: 'Authority', group: 'Ethics' },
-      ethics_loyalty: { label: 'Loyalty', group: 'Ethics' },
+    let currentQuestion = 0;
+    let selectedAnswerIndex = -1;
 
-      epi_empiricism: { label: 'Empiricism', group: 'Epistemology' },
-      epi_rationalism: { label: 'Rationalism', group: 'Epistemology' },
-      epi_faith: { label: 'Faith', group: 'Epistemology' },
-      epi_update: { label: 'Updates-on-Data', group: 'Epistemology' },
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
 
-      media_mainstream: { label: 'Mainstream', group: 'Media' },
-      media_indie: { label: 'Independent', group: 'Media' },
-      media_trust: { label: 'Inst. Trust', group: 'Media' },
-    };
+    function loadQuestion() {
+      const data = quizData[currentQuestion];
+      questionEl.textContent = data.question;
+      answersEl.innerHTML = "";
+      selectedAnswerIndex = -1;
 
-    // --- STATE -------------------------------------------------------------
-    let state = {
-      packIndex: 0,
-      qIndex: 0,
-      answers: {},      // { packId: [choiceIndex, ...] }
-      scores: {},       // { dimKey: number }
-      visibility: {},   // { group: boolean }
-      seed: Math.random().toString(36).slice(2, 8),
-    };
+      data.answers.forEach((ans, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = ans;
+        btn.classList.add("answer");
+        btn.setAttribute("data-index", i);
 
-    const el = sel => document.querySelector(sel);
-    const els = sel => Array.from(document.querySelectorAll(sel));
-
-    // --- UTIL --------------------------------------------------------------
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-    function today(){ return new Date().toLocaleString([], { dateStyle:'medium', timeStyle:'short' }); }
-    function save(){ localStorage.setItem('belief-quiz-mvp', JSON.stringify(state)); }
-    function load(){ const s = localStorage.getItem('belief-quiz-mvp'); if(s){ state = { ...state, ...JSON.parse(s) }; } }
-    function reset(){ localStorage.removeItem('belief-quiz-mvp'); location.reload(); }
-
-    // --- QUIZ RENDER -------------------------------------------------------
-    function renderQuiz(){
-      const pack = PACKS[state.packIndex];
-      el('#screen-intro').style.display = 'none';
-      el('#screen-result').style.display = 'none';
-      el('#screen-quiz').style.display = '';
-
-      el('#packTitle').textContent = pack.name;
-      const totalQ = pack.questions.length;
-      el('#qCounter').textContent = `Question ${state.qIndex+1} of ${totalQ}`;
-      el('#progressBar').style.width = `${Math.round(((state.qIndex)/totalQ)*100)}%`;
-
-      const q = pack.questions[state.qIndex];
-      const box = el('#questionBox');
-      box.innerHTML = '';
-
-      const qEl = document.createElement('div');
-      qEl.innerHTML = `<div class="h2" style="margin-bottom:8px">${q.q}</div><div class="muted small">Select one</div>`;
-      box.appendChild(qEl);
-
-      const choices = document.createElement('div');
-      choices.className = 'choices';
-      q.choices.forEach((c, idx)=>{
-        const div = document.createElement('div');
-        div.className = 'choice';
-        div.textContent = c.label;
-        div.onclick = ()=>{
-          (state.answers[pack.id] ||= []); state.answers[pack.id][state.qIndex] = idx; save();
-          els('.choice').forEach(x=>x.style.borderColor='rgba(255,255,255,.12)');
-          div.style.borderColor='var(--accent)';
-        }
-        // highlight if already chosen
-        if(state.answers[pack.id] && typeof state.answers[pack.id][state.qIndex] === 'number' && state.answers[pack.id][state.qIndex] === idx){
-          div.style.borderColor='var(--accent)';
-        }
-        choices.appendChild(div);
-      });
-      box.appendChild(choices);
-
-      el('#backBtn').onclick = ()=>{
-        if(state.qIndex>0){ state.qIndex--; } else if(state.packIndex>0){ state.packIndex--; state.qIndex = PACKS[state.packIndex].questions.length-1; }
-        renderQuiz();
-      };
-
-      el('#nextBtn').onclick = ()=>{
-        const chosen = state.answers[pack.id]?.[state.qIndex];
-        if(typeof chosen !== 'number'){ alert('Pick an option to continue.'); return; }
-        if(state.qIndex < pack.questions.length-1){ state.qIndex++; renderQuiz(); }
-        else if(state.packIndex < PACKS.length-1){ state.packIndex++; state.qIndex = 0; renderQuiz(); }
-        else { computeScores(); renderResult(); }
-        save();
-      };
-    }
-
-    // --- SCORING + ARCHETYPE ----------------------------------------------
-    function computeScores(){
-      const scores = {}; // sum
-      PACKS.forEach(pack=>{
-        const ans = state.answers[pack.id] || [];
-        ans.forEach((choiceIdx, qi)=>{
-          const choice = pack.questions[qi].choices[choiceIdx];
-          if(!choice) return;
-          for(const [k,v] of Object.entries(choice.score)){
-            scores[k] = (scores[k]||0) + v;
-          }
+        btn.addEventListener("click", () => {
+          selectAnswer(i);
         });
-      });
-      state.scores = scores;
+        btn.addEventListener("dblclick", submitAnswer);
 
-      // Default visibility: all groups shown
-      if(!state.visibility || Object.keys(state.visibility).length===0){
-        const groups = [...new Set(Object.values(DIMENSIONS).map(d=>d.group))];
-        state.visibility = Object.fromEntries(groups.map(g=>[g,true]));
+        answersEl.appendChild(btn);
+      });
+
+      // Focus the first option by default for accessibility
+      const firstBtn = answersEl.querySelector(".answer");
+      if (firstBtn) firstBtn.focus();
+    }
+
+    function selectAnswer(index) {
+      selectedAnswerIndex = index;
+      document.querySelectorAll(".answer").forEach((btn, i) => {
+        btn.classList.toggle("selected", i === index);
+      });
+    }
+
+    function submitAnswer() {
+      if (selectedAnswerIndex === -1) return; // require selection first
+      if (currentQuestion < quizData.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        questionEl.textContent = "Thanks for completing the quiz!";
+        answersEl.innerHTML = "";
       }
-      save();
     }
 
-    function deriveArchetype(){
-      // Simple heuristic: pick dominant trio across groups
-      const entries = Object.entries(state.scores);
-      if(entries.length===0) return { title:'New Explorer', tag:'Just getting started', summary:'Answer more to reveal your pattern.' };
-      const top = entries.sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>DIMENSIONS[k].label);
-      const mixes = [
-        { match:['Empiricism','Fairness','Independent'], title:'The Evidence Explorer', tag:'Data-forward, fairness-tuned, indie-curious' },
-        { match:['Faith','Authority','Mainstream'], title:'The Tradition Keeper', tag:'Faith-informed, order-seeking, mainstream-tuned' },
-        { match:['Rationalism','Fairness','Independent'], title:'The Reasonable Maverick', tag:'Argument-driven, fairness-first, indie lean' },
-      ];
-      const found = mixes.find(m=>m.match.every(x=>top.includes(x)));
-      const title = found ? found.title : `${top[0]}-led Hybrid`;
-      const tag = found ? found.tag : `Leaning ${top.join(' • ')}`;
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+      const answers = document.querySelectorAll(".answer");
+      if (!answers.length) return;
 
-      const summary = `Your answers emphasize ${top[0]}${top[1]?`, ${top[1]}`:''}${top[2]?`, and ${top[2]}`:''}. Keep answering packs to refine.`;
-      return { title, tag, summary };
-    }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectedAnswerIndex = (selectedAnswerIndex + 1) % answers.length;
+        selectAnswer(selectedAnswerIndex);
+        answers[selectedAnswerIndex].focus();
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectedAnswerIndex = (selectedAnswerIndex - 1 + answers.length) % answers.length;
+        selectAnswer(selectedAnswerIndex);
+        answers[selectedAnswerIndex].focus();
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitAnswer();
+      }
+    });
 
-    // --- RESULT RENDER -----------------------------------------------------
-    let chart;
-    function renderResult(){
-      el('#screen-intro').style.display = 'none';
-      el('#screen-quiz').style.display = 'none';
-      el('#screen-result').style.display = '';
-      el('#exportBtn').disabled = false;
-
-      const { title, tag, summary } = deriveArchetype();
-      el('#archetypeTitle').textContent = title;
-      el('#archetypeTag').textContent = tag;
-      el('#summaryText').textContent = summary;
-      el('#timestamp').textContent = today();
-
-      // Visibility toggles
-      const groups = [...new Set(Object.values(DIMENSIONS).map(d=>d.group))];
-      const wrap = el('#visibilityToggles');
-      wrap.innerHTML = '';
-      groups.forEach(g=>{
-        const id = `vis-${g}`;
-        const lab = document.createElement('label');
-        lab.className = 'switch';
-        lab.innerHTML = `<input type="checkbox" id="${id}" ${state.visibility[g]?'checked':''}><span class="toggle"></span><span>${g}</span>`;
-        wrap.appendChild(lab);
-        lab.querySelector('input').addEventListener('change', (e)=>{ state.visibility[g] = e.target.checked; drawRadar(); save(); });
-      });
-
-      drawRadar();
-    }
-
-    function drawRadar(){
-      // Build labels and values from visible groups only
-      const entries = Object.entries(state.scores).filter(([k])=> state.visibility[ DIMENSIONS[k].group ]);
-      const labels = entries.map(([k])=>DIMENSIONS[k].label);
-      const values = entries.map(([_,v])=> v);
-      const max = Math.max(2, ...values);
-
-      const ctx = el('#radarChart');
-      if(chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type: 'radar',
-        data: { labels, datasets: [{ label:'Profile', data: values, fill: true }] },
-        options: {
-          responsive: false,
-          scales: { r: { beginAtZero:true, suggestedMax: Math.max(4, max), grid: { color:'rgba(255,255,255,.15)' }, angleLines:{ color:'rgba(255,255,255,.12)' }, pointLabels:{ color:'#bcd0e0', font:{size:12} } } },
-          plugins: { legend: { display:false } }
-        }
-      });
-    }
-
-    // --- EXPORT ------------------------------------------------------------
-    async function exportCard(){
-      const node = el('#shareCard');
-      const fileName = `belief-card-${state.seed}.png`;
-      try{
-        const dataUrl = await htmlToImage.toPng(node, { pixelRatio: 2, backgroundColor: '#0b1020' });
-        const a = document.createElement('a'); a.href = dataUrl; a.download = fileName; a.click();
-      }catch(err){ console.error(err); alert('Export failed. Try again.'); }
-    }
-
-    // --- WIRING ------------------------------------------------------------
-    el('#startBtn').onclick = ()=>{ state.packIndex=0; state.qIndex=0; renderQuiz(); };
-    el('#demoBtn').onclick = ()=>{ // prefill demo answers
-      PACKS.forEach(p=>{ state.answers[p.id] = p.questions.map(()=> Math.floor(Math.random()*2)); });
-      computeScores(); renderResult(); save();
-    };
-    el('#resetBtn').onclick = reset;
-    el('#exportBtn').onclick = exportCard;
-
-    // Load previous session if any
-    load();
-    if(Object.keys(state.answers).length){ computeScores(); renderResult(); }
+    loadQuestion();
   </script>
 </body>
 </html>
