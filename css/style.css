@@ -49,7 +49,7 @@ section.claim img {
   padding: 1rem;
 }
 
-section.claim {
+/* section.claim {
   background: #f9f9f9;
   border-radius: 12px;
   border: 1px solid #ddd;
@@ -61,7 +61,7 @@ section.claim {
 section.claim:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-}
+} */
 
 section.claim h2 {
   font-size: 1.2rem;
