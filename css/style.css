@@ -41,3 +41,59 @@ section.claim img {
   margin-top: 0.5rem;
   border-radius: 6px;
 }
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+section.claim {
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+section.claim:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+}
+
+section.claim h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+section.claim ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+section.claim li {
+  margin: 0.4rem 0;
+}
+
+section.claim a {
+  text-decoration: none;
+  color: #0077cc;
+  font-weight: 600;
+}
+
+section.claim a:hover {
+  text-decoration: underline;
+}
+footer {
+  background: #222;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
